@@ -45,70 +45,73 @@ public class DNSlookup {
 		
 		
 		// HEADER SECTION 
-		// Generate Query ID 
-		Random randomGenerator = new Random();
-		int randomInt = randomGenerator.nextInt(65536);
-		ByteBuffer b = ByteBuffer.allocate(2);
-		byte[] qID = b.array();
-		qID.putInt(randomInt);
-		
-		// or
-		// int curId = (int) System.currentTimeMillis() & 0xffff;
+				// Generate Query ID 
+				Random randomGenerator = new Random();
+				int randomInt = randomGenerator.nextInt(65536);
+				ByteBuffer b = ByteBuffer.allocate(4);
+				b.putInt(randomInt);
+				byte[] qID = b.array();
+				
+				
+				// or
+				// int curId = (int) System.currentTimeMillis() & 0xffff;
 
-		// Generate QR to RD
-		//byte[] qr = ByteBuffer.allocate(1);
-		//qr.putInt(0);
-		
-		// QR to RCODE and QDCOUNT to ARCOUNT
-		byte[] arr = new byte[] { (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x01, (byte)0x00, (byte)0x00,
-		(byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00};
-		
-		byte[] header = new byte[qID.length + arr.length];
-		System.arraycopy(qID, 0, header, 0, qID.length);        //.length() or .length ?
-		System.arraycopy(arr, 0, header, qID.length, arr.length);
+				// Generate QR to RD
+				//byte[] qr = ByteBuffer.allocate(1);
+				//qr.putInt(0);
+				
+				// QR to RCODE and QDCOUNT to ARCOUNT
+				byte[] arr = new byte[] { (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x01, (byte)0x00, (byte)0x00,
+				(byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00};
+				
+				byte[] header = new byte[qID.length + arr.length];
+				System.arraycopy(qID, 0, header, 0, qID.length);        //.length() or .length ?
+				System.arraycopy(arr, 0, header, qID.length, arr.length);
 
-		
-		
-		// QUESTION SECTION
-		// convert a domain name to byte array
-		//"www.ugrad.cs.ubc.ca"
-		String[] parts = fqdn.split("\\."); 
-		int num = parts.length();
-		//byte[]  lengthOctets = new byte[num];
-		int counter = 0;
-		for (int i=0; i< num; i++){
-			counter += parts[i].length();
-		}
-		byte[] qName = new byte[num+counter];
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
-		for (int i=0; i< num; i++){
-			//counter += parts[i].length();
-			//lengthOctets.add((byte)parts[i].length());
-			outputStream.write( (byte)parts[i].length() );
-			outputStream.write( parts[i].getBytes(StandardCharsets.UTF_8) );
+				
+				
+				// QUESTION SECTION
+				// convert a domain name to byte array
+				//"www.ugrad.cs.ubc.ca"
+				String[] part = fqdn.split("\\."); 
+				int num = part.length;
+				//byte[]  lengthOctets = new byte[num];
+				int counter = 0;
+				for (int i=0; i< num; i++){
+					counter += part[i].length();
+				}
+				byte[] qName = new byte[num+counter];
+				ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
+				for (int i=0; i< num; i++){
+					//counter += parts[i].length();
+					//lengthOctets.add((byte)parts[i].length());
+					outputStream.write( (byte)part[i].length() );
+					outputStream.write( part[i].getBytes(StandardCharsets.UTF_8) );
+					
+		        }
+		        byte[] end = new byte[] {(byte)0x00};
+		        outputStream.write(end);
+
+				qName = outputStream.toByteArray();
+				
+			    byte[] qtype = new byte[] {(byte)0x00 , (byte)0x01};
 			
-        }
-        byte[] end = new byte[] {(byte)0x00};
-        outputStream.write(end);
+		        byte[] qclass = new byte[] {(byte)0x00 , (byte)0x01};
 
-		qName = outputStream.toByteArray();
-		
-	    byte[] qtype = new byte[] {(byte)0x00 , (byte)0x01};
-	
-        byte[] qclass = new byte[] {(byte)0x00 , (byte)0x01};
-
-        ByteArrayOutputStream que = new ByteArrayOutputStream( );
-        que.write(qName);
-        que.write(qtype);
-        que.write(qclass);
-        byte[] question = que.toByteArray();
+		        ByteArrayOutputStream que = new ByteArrayOutputStream( );
+		        que.write(qName);
+		        que.write(qtype);
+		        que.write(qclass);
+		        byte[] question = que.toByteArray();
 
 
-		byte[] query = new byte[header.length + question.length];
-		System.arraycopy(header, 0, query, 0, header.length);
-		System.arraycopy(question, 0, query, header.length, question.length);
+				byte[] query = new byte[header.length + question.length];
+				System.arraycopy(header, 0, query, 0, header.length);
+				System.arraycopy(question, 0, query, header.length, question.length);
 
-		
+				
+				System.out.println(Arrays.toString(query));
+						
 		
 		
 		
